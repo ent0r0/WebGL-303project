@@ -2,6 +2,8 @@ const http = require("http");
 const fs = require("fs");
 const path = require("path");
 
+const PORT = process.env.PORT || 3000;
+
 const server = http.createServer((req, res) => {
   let filePath = "index.html";
 
@@ -15,6 +17,7 @@ const server = http.createServer((req, res) => {
   if (ext === ".js") contentType = "application/javascript";
   if (ext === ".css") contentType = "text/css";
   if (ext === ".wasm") contentType = "application/wasm";
+  if (ext === ".data") contentType = "application/octet-stream";
 
   fs.readFile(filePath, (err, content) => {
     if (err) {
@@ -27,6 +30,6 @@ const server = http.createServer((req, res) => {
   });
 });
 
-server.listen(3000, () => {
-  console.log("http://localhost:3000 で起動中");
+server.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
