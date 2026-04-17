@@ -5,11 +5,7 @@ const path = require("path");
 const PORT = process.env.PORT || 3000;
 
 const server = http.createServer((req, res) => {
-  let filePath = "index.html";
-
-  if (req.url !== "/") {
-    filePath = req.url.substring(1);
-  }
+  let filePath = req.url === "/" ? "index.html" : "." + req.url;
 
   const ext = path.extname(filePath);
 
@@ -18,6 +14,10 @@ const server = http.createServer((req, res) => {
   if (ext === ".css") contentType = "text/css";
   if (ext === ".wasm") contentType = "application/wasm";
   if (ext === ".data") contentType = "application/octet-stream";
+
+  if (filePath.endsWith(".gz")) {
+    res.setHeader("Content-Encoding", "gzip");
+  }
 
   fs.readFile(filePath, (err, content) => {
     if (err) {
