@@ -1,35 +1,29 @@
-const http = require("http");
-const fs = require("fs");
-const path = require("path");
+const express = require('express');
+const app = express();
+const path = require('path');
 
-const PORT = process.env.PORT || 3000;
-
-const server = http.createServer((req, res) => {
-  let filePath = req.url === "/" ? "index.html" : "." + req.url;
-
-  const ext = path.extname(filePath);
-
-  let contentType = "text/html";
-  if (ext === ".js") contentType = "application/javascript";
-  if (ext === ".css") contentType = "text/css";
-  if (ext === ".wasm") contentType = "application/wasm";
-  if (ext === ".data") contentType = "application/octet-stream";
-
-  if (filePath.endsWith(".gz")) {
-    res.setHeader("Content-Encoding", "gzip");
-  }
-
-  fs.readFile(filePath, (err, content) => {
-    if (err) {
-      res.writeHead(404);
-      res.end("Not Found");
-    } else {
-      res.writeHead(200, { "Content-Type": contentType });
-      res.end(content);
+// 静的ファイル配信（Unity用にMIMEも設定）
+app.use(express.static(__dirname, {
+  setHeaders: function (res, filePath) {
+    if (filePath.endsWith('.wasm')) {
+      res.setHeader('Content-Type', 'application/wasm');
     }
-  });
+    if (filePath.endsWith('.data')) {
+      res.setHeader('Content-Type', 'application/octet-stream');
+    }
+    if (filePath.endsWith('.js')) {
+      res.setHeader('Content-Type', 'application/javascript');
+    }
+  }
+}));
+
+// ルートアクセスでindex.htmlを返す
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-server.listen(PORT, () => {
+// サーバー起動
+const PORT = process.env.PORT || 10000;
+app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
